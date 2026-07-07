@@ -36,7 +36,9 @@
 - [x] 4.5 等待通过角色：`friend.accepted`(实证)→`accepted`+`first_touch.needed`；`rejected`/`expired`/超时→`failed`；连续失败到顶升级+置风控态+告警；**协调器不自动重发** <!-- aiim-service 8e0de95 -->
 - [x] 4.6 被动加友受理角色：`friend.request_received` 非可疑→`friend.accept`、可疑关键词→挂人审告警 <!-- aiim-service 8e0de95 -->
 - [x] 4.7 多租户：`op.result`/`2131` 按账号定向、不串号 <!-- aiim-service d83f864 per-account RiskController + pendingConfirms 按 (accountId,wxid) 分键 + 事件带 accountId；e2e 测试 acc1 通过不影响 acc2 -->
-- [ ] 4.8 号龄/垂类选号打分 + 加友通过率 ratioGuard 实接（当前 selectAccount 仅按配额、ratioGuard 占位放行）
+- [x] 4.8a 加友通过率 ratioGuard 实接：结果反馈（note accepted/rejected）→ 近窗通过率<30%且样本≥10 停加友背压 <!-- aiim-service 78f61de kernel note() + WECHAT ratioGuard + 协调器 note；含 4 测试 -->
+- [ ] 4.8b 号龄/垂类选号打分（当前 selectAccount 仅按配额 canDo）
+- [ ] 4.8c `2131` 不可靠时的退避轮询兜底（当前只事件路径）
 
 ## 5. aiim-service — packages/store
 
