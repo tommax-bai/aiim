@@ -12,7 +12,8 @@
 - [x] 1.1b 泛型化 `EventBus<TMap>`（从 aidcp-cloud/src/event-bus 复制，去掉硬 import 的 XHS AllEventMap） <!-- aiim-service e39e455 -->
 - [x] 1.2 参数化 `RiskAction` 为微信动词（`add_friend`/`accept_friend`/…）、重定义加友配额三档（养号/正常/激进）、删/换 `likeRatioAllowsNextLike` 与 `zeroInteractions` 的 XHS 浅耦合 <!-- aiim-service e39e455 三处 XHS 硬编码换成注入式 RiskPolicy（restrictedAllowedActions/warnedPausedActions/ratioGuard）；WECHAT_RISK_POLICY 在 packages/contracts/risk-policy.ts -->
 - [x] 1.3 复制 `humanize/timing`（`jitterAround` 乘性 lognormal + `gaussian`）+ gateway 按账号串行加友、发起前叠 `jitter(preAddDelayMs)`+sleep <!-- aiim-service 4dcfb6e；pacing `tempoForStatus` 用于 preAddDelay 的 STATUS_TEMPO 已在协调器；lint 禁反向依赖规则待配 eslint -->
-- [ ] 1.4 配 eslint 边界规则：禁止 `packages/kernel` 反向依赖 `apps/*` / `@aiim/contracts`（当前靠约定 + 目录结构）
+- [x] 1.4 分层边界规则：`npm run lint`（零依赖脚本 `scripts/check-boundaries.mjs`）强制 kernel 不 import 任何 `@aiim/*`/`apps/*`、contracts 只依赖 kernel <!-- aiim-service fc079f7；eslint 依赖树网络装不动，改轻量纯 node 脚本（符合「轻量优先」）；违规退出码 1 -->
+- [ ] 1.5 网络可用时可选替换/补充为 eslint（typescript-eslint flat config）——非必需，当前轻量脚本已强制核心不变量
 
 ## 2. aiim-service — packages/contracts
 
