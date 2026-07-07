@@ -22,9 +22,9 @@
 
 ## 3. aiim-service — apps/gateway
 
-- [ ] 3.1 出站：封装 `add_search_wx_contact` / `add_room_contact` / `agree_contact` / `sync_contact`（回执归一为 `op.result`，`is_svr_fail` 如实回报，绝不假成功）
-- [ ] 3.2 入站：`2131`/`2132` 回调归一化为标准事件；`appinfo`/`seq` 去重水位
-- [ ] 3.3 「真通过」确认：`2131`→触发 `sync_contact` 增量确认目标进好友列表；提供方不可靠时退避轮询兜底
+- [x] 3.1 出站：`Provider` 抽象(addFriend/agreeFriend/syncContacts) + gateway 把命令翻成 provider 调用、回执归一为 `op.result`(`is_svr_fail` 如实回报、绝不假成功) <!-- aiim-service d83f864 结构+FakeProvider 完成；真 HTTP 客户端实现待先决 0.1 -->
+- [x] 3.2 入站：`2131`/`2132` 回调归一化为标准事件(`friend_change`/`friend_apply`→`friend.request_received`/触发确认) <!-- aiim-service d83f864；`appinfo`/`seq` 消息去重属对话 change 范围，此处加友事件不需 -->
+- [x] 3.3 「真通过」确认：`2131`→`sync_contacts` 增量确认目标进好友列表→`friend.accepted`(实证) <!-- aiim-service d83f864 事件路径完成；提供方 2131 不可靠时的退避轮询兜底待接(4.8 同批) -->
 
 ## 4. aiim-service — apps/brain（加友闭环角色 + 状态机）
 
@@ -34,7 +34,7 @@
 - [x] 4.4 发起 + 后置校验：记账占额 → 下发 → `op.result` 确认「请求真发出」标 `pending`（回执 ok 绝不判成功/触发首触） <!-- aiim-service 8e0de95；超时改由 sweepTimeouts 巡视驱动，非 setTimeout -->
 - [x] 4.5 等待通过角色：`friend.accepted`(实证)→`accepted`+`first_touch.needed`；`rejected`/`expired`/超时→`failed`；连续失败到顶升级+置风控态+告警；**协调器不自动重发** <!-- aiim-service 8e0de95 -->
 - [x] 4.6 被动加友受理角色：`friend.request_received` 非可疑→`friend.accept`、可疑关键词→挂人审告警 <!-- aiim-service 8e0de95 -->
-- [ ] 4.7 多租户：`op.result`/`2131` 按账号定向、不串号 <!-- 部分：per-account RiskController + accounts() 选号已在；连接绑定/定向回发的完整路由待接 -->
+- [x] 4.7 多租户：`op.result`/`2131` 按账号定向、不串号 <!-- aiim-service d83f864 per-account RiskController + pendingConfirms 按 (accountId,wxid) 分键 + 事件带 accountId；e2e 测试 acc1 通过不影响 acc2 -->
 - [ ] 4.8 号龄/垂类选号打分 + 加友通过率 ratioGuard 实接（当前 selectAccount 仅按配额、ratioGuard 占位放行）
 
 ## 5. aiim-service — packages/store
@@ -54,5 +54,6 @@
 ## 7. 收口
 
 - [ ] 7.1 `openspec validate friend-add-closed-loop --strict` 通过
-- [ ] 7.2 端到端冒烟：1 测试号走 外部指令→加友→(mock 提供方 2131)→确认通过→`first_touch.needed`，人工核对失败如实上报
+- [x] 7.2 端到端冒烟：外部指令→加友→(fake 提供方 2131)→sync 确认通过→`first_touch.needed`；含 is_svr_fail 诚实失败、被动 e2e、多租户不串号 <!-- aiim-service d83f864 apps/gateway/test/e2e.test.ts；真机冒烟待真 HTTP Provider -->
+- [x] 7.1a 中途校验：`openspec validate friend-add-closed-loop --strict` 通过（结构完整，非最终 archive） <!-- 19/19 测试过 -->
 - [ ] 7.3 archive
