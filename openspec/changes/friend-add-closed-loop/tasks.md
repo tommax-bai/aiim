@@ -59,5 +59,6 @@
 
 - [ ] 7.1 `openspec validate friend-add-closed-loop --strict` 通过
 - [x] 7.2 端到端冒烟：外部指令→加友→(fake 提供方 2131)→sync 确认通过→`first_touch.needed`；含 is_svr_fail 诚实失败、被动 e2e、多租户不串号 <!-- aiim-service d83f864 apps/gateway/test/e2e.test.ts；真机冒烟待真 HTTP Provider -->
-- [x] 7.1a 中途校验：`openspec validate friend-add-closed-loop --strict` 通过（结构完整，非最终 archive） <!-- 19/19 测试过 -->
-- [ ] 7.3 archive
+- [x] 7.1a 中途校验：`openspec validate friend-add-closed-loop --strict` 通过（结构完整，非最终 archive） <!-- 32/32 测试过 -->
+- [x] 7.4 可运行入口 + dev 部署：`apps/server`（HTTP health/webhook/intake + 装配 + WeworkProvider）打成单文件 bundle，部署到 dev `121.89.85.150:/opt/aiim`（端口 8990、`aiim.service`、fake 模式骨架），isales/aidcp 未碰 <!-- aiim-service 37fe443；见 aiim/docs/deployment-dev.md；真实收发待 0.1 的 guid -->
+- [ ] 7.3 archive（等真 HTTP Provider guid 接通 + PG 后归档）

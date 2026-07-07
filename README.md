@@ -46,5 +46,6 @@
 ## 文档索引
 
 - **[业务设计（权威）](docs/business-design.md)** —— 定位/边界/能力清单/角色拆分/运营驱动/运行时并发/架构/风控/仓库拓扑/实施路径
+- **[dev 部署](docs/deployment-dev.md)** —— 落点(121.89.85.150 独立目录/端口 8990/aiim.service)、单文件 bundle、重部署、健康检查
 - OpenSpec 基线：[`openspec/project.md`](openspec/project.md)
 - 开发规范：[AGENTS.md](AGENTS.md) · [CLAUDE.md](CLAUDE.md)
