@@ -28,25 +28,28 @@
 
 ## 4. aiim-service — apps/brain（加友闭环角色 + 状态机）
 
-- [ ] 4.1 受理去重角色：校验/去重(已好友/已 pending/黑名单)，无效如实拒
-- [ ] 4.2 选号角色：按号龄/当日加友配额/垂类打分选号；无可用号 `deferred` 排队
-- [ ] 4.3 加友风控闸：`canDo('add_friend')`，准→带 `preAddDelayMs`、拒→背压（不扣预算、不自升状态）
-- [ ] 4.4 发起 + 后置校验：`op.result` 确认「请求真发出」，标 `pending`，启超时定时器
-- [ ] 4.5 等待通过角色：消费 `friend.accepted`/`rejected`/`expired`/超时 → `accepted` 发 `first_touch.needed`；`failed` 记风控信号、超时可换号/隔日重试；连续失败到顶升级+置风控态+告警
-- [ ] 4.6 被动加友受理角色：`friend.request_received` 判自动通过/挂人审 → `friend.accept` → 通过后交棒首触
-- [ ] 4.7 多租户：`op.result`/`2131` 按账号定向、不串号
+- [x] 4.1 受理去重角色：校验/去重(已好友/已 pending/黑名单)，无效如实拒 <!-- aiim-service 8e0de95 coordinator intake（findActiveByTargetKey 跨号去重 + no_target/blacklist/already_friend 如实拒） -->
+- [x] 4.2 选号角色：按当日加友配额选号（号龄/垂类打分待接）；无可用号 `deferred` 排队 <!-- aiim-service 8e0de95 selectAccount（canDo 为准），号龄/垂类打分留 TODO -->
+- [x] 4.3 加友风控闸：`canDo('add_friend')`，准→带 `preAddDelayMs`（按 tempo 缩放）、拒→背压 deferred（不扣预算、不自升状态） <!-- aiim-service 8e0de95 -->
+- [x] 4.4 发起 + 后置校验：记账占额 → 下发 → `op.result` 确认「请求真发出」标 `pending`（回执 ok 绝不判成功/触发首触） <!-- aiim-service 8e0de95；超时改由 sweepTimeouts 巡视驱动，非 setTimeout -->
+- [x] 4.5 等待通过角色：`friend.accepted`(实证)→`accepted`+`first_touch.needed`；`rejected`/`expired`/超时→`failed`；连续失败到顶升级+置风控态+告警；**协调器不自动重发** <!-- aiim-service 8e0de95 -->
+- [x] 4.6 被动加友受理角色：`friend.request_received` 非可疑→`friend.accept`、可疑关键词→挂人审告警 <!-- aiim-service 8e0de95 -->
+- [ ] 4.7 多租户：`op.result`/`2131` 按账号定向、不串号 <!-- 部分：per-account RiskController + accounts() 选号已在；连接绑定/定向回发的完整路由待接 -->
+- [ ] 4.8 号龄/垂类选号打分 + 加友通过率 ratioGuard 实接（当前 selectAccount 仅按配额、ratioGuard 占位放行）
 
 ## 5. aiim-service — packages/store
 
-- [ ] 5.1 加友任务持久化（状态机跨重启）+ 身份稳定化（wxid 先暂存后晋升）
-- [ ] 5.2 appinfo 去重水位 + 账号风控计数持久化
+- [x] 5.1a 加友任务存储接口 + 内存实现（`FriendAddStore` / `InMemoryFriendAddStore`：CRUD + 按 targetKey/requestId 查 + listPending + 黑名单/已好友 + 连续失败计数） <!-- aiim-service 8e0de95 -->
+- [ ] 5.1 PG 持久化（状态机跨重启）+ 身份稳定化（wxid 先暂存后晋升）—— 内存版已就位，PG 实现替换接口即可
+- [ ] 5.2 appinfo 去重水位 + 账号风控计数持久化（PG）
 
 ## 6. 验收（红线套件，落 apps/*/test）
 
-- [ ] 6.1 `AC-ADD-*`：回执 ok 不判成功；无 2131/轮询确认前不触发首触；找不到目标报 `no_target`
-- [ ] 6.2 `AC-ADD-*`：超时判失败、连续失败到顶升级、绝不无限重发
+- [x] 6.1 `AC-ADD-*`：回执 ok 不判成功；无 `friend.accepted` 实证前不触发首触；找不到目标报 `no_target` <!-- aiim-service 8e0de95 apps/brain/test/friend-add.test.ts -->
+- [x] 6.2 `AC-ADD-*`：超时判失败、连续失败到顶升级、绝不无限重发 <!-- aiim-service 8e0de95 -->
+- [x] 6.4 去重：同一 `(账号,目标)` 重复指令幂等、不重复发起 <!-- aiim-service 8e0de95 -->
+- [x] 6.5 被动加友：自动通过 / 可疑挂人审两分支 <!-- aiim-service 8e0de95 -->
 - [x] 6.3 `AC-RISK-*`：加友配额耗尽只背压不自升状态；被禁号 `record` 返 false <!-- aiim-service e39e455 packages/kernel/test/risk-controller.test.ts 6/6 过（含状态机迁移/restricted/warned 门控/ratioGuard） -->
-- [ ] 6.4 去重：同一 `(账号,目标)` 重复指令幂等、不重复发起
 
 ## 7. 收口
 
