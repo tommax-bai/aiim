@@ -8,15 +8,17 @@
 
 ## 1. aiim-service — packages/kernel（复制 AIDCP 内核 + 泛型化/参数化）
 
-- [ ] 1.1 从 `aidcp-cloud/src/risk/` 复制 `RiskController` + `risk-state-machine` + `sliding-window-counter` + `quotas` + `registry`；泛型化 `RiskController<TAction>`
-- [ ] 1.2 参数化 `RiskAction` 为微信动词（`add_friend`/`accept_friend`/…）、重定义加友配额三档（养号/正常/激进）、删/换 `likeRatioAllowsNextLike` 与 `zeroInteractions` 的 XHS 浅耦合
+- [x] 1.1 从 `aidcp-cloud/src/risk/` 复制 `RiskController` + `risk-state-machine` + `sliding-window-counter` + `quotas`；泛型化 `EventBus<TMap>` / `RiskController<A>` <!-- aiim-service e39e455 registry 暂未复制（单账号先直接实例化，多租户 registry 待 4.7） -->
+- [x] 1.1b 泛型化 `EventBus<TMap>`（从 aidcp-cloud/src/event-bus 复制，去掉硬 import 的 XHS AllEventMap） <!-- aiim-service e39e455 -->
+- [x] 1.2 参数化 `RiskAction` 为微信动词（`add_friend`/`accept_friend`/…）、重定义加友配额三档（养号/正常/激进）、删/换 `likeRatioAllowsNextLike` 与 `zeroInteractions` 的 XHS 浅耦合 <!-- aiim-service e39e455 三处 XHS 硬编码换成注入式 RiskPolicy（restrictedAllowedActions/warnedPausedActions/ratioGuard）；WECHAT_RISK_POLICY 在 packages/contracts/risk-policy.ts -->
 - [ ] 1.3 复制 `humanize/timing`（对数正态抖动）+ pacing `tempoForStatus` 骨架；lint 禁止 kernel 反向依赖 apps/contracts
 
 ## 2. aiim-service — packages/contracts
 
-- [ ] 2.1 入站事件：`friend.request_received` / `friend.accepted` / `friend.rejected` / `friend.expired` / `op.result`
-- [ ] 2.2 出站指令：`friend.add`（wxid/手机号 + 渠道 + 申请语 + `preAddDelayMs`）/ `friend.accept`
-- [ ] 2.3 加友任务/账号最小类型（状态枚举 received→accepted/failed、身份键、去重键）
+- [x] 2.1 入站事件：`friend.request_received` / `friend.accepted` / `friend.rejected` / `friend.expired` / `op.result`（+ `friend.add_requested` 受理入口 / `first_touch.needed` 交棒） <!-- aiim-service e39e455 events.ts + WechatEventMap -->
+- [x] 2.2 出站指令：`friend.add`（wxid/手机号 + 渠道 + 申请语 + `preAddDelayMs`）/ `friend.accept` <!-- aiim-service e39e455 commands.ts + WechatCommandMap -->
+- [x] 2.3 加友任务/账号最小类型（状态枚举 received→accepted/failed、身份键、去重键 `targetKey`） <!-- aiim-service e39e455 friend-add.ts -->
+- [x] 2.4 版本化信封 `Envelope<TType>`（沿用 AIDCP 信封思想、泛型化，供未来跨进程/回放/审计） <!-- aiim-service e39e455 envelope.ts -->
 
 ## 3. aiim-service — apps/gateway
 
@@ -43,7 +45,7 @@
 
 - [ ] 6.1 `AC-ADD-*`：回执 ok 不判成功；无 2131/轮询确认前不触发首触；找不到目标报 `no_target`
 - [ ] 6.2 `AC-ADD-*`：超时判失败、连续失败到顶升级、绝不无限重发
-- [ ] 6.3 `AC-RISK-*`：加友配额耗尽只背压不自升状态；被禁号 `record` 返 false
+- [x] 6.3 `AC-RISK-*`：加友配额耗尽只背压不自升状态；被禁号 `record` 返 false <!-- aiim-service e39e455 packages/kernel/test/risk-controller.test.ts 6/6 过（含状态机迁移/restricted/warned 门控/ratioGuard） -->
 - [ ] 6.4 去重：同一 `(账号,目标)` 重复指令幂等、不重复发起
 
 ## 7. 收口
