@@ -38,7 +38,7 @@
 - [x] 4.7 多租户：`op.result`/`2131` 按账号定向、不串号 <!-- aiim-service d83f864 per-account RiskController + pendingConfirms 按 (accountId,wxid) 分键 + 事件带 accountId；e2e 测试 acc1 通过不影响 acc2 -->
 - [x] 4.8a 加友通过率 ratioGuard 实接：结果反馈（note accepted/rejected）→ 近窗通过率<30%且样本≥10 停加友背压 <!-- aiim-service 78f61de kernel note() + WECHAT ratioGuard + 协调器 note；含 4 测试 -->
 - [ ] 4.8b 号龄/垂类选号打分（当前 selectAccount 仅按配额 canDo）
-- [ ] 4.8c `2131` 不可靠时的退避轮询兜底（当前只事件路径）
+- [x] 4.8c `2131` 不可靠时的轮询兜底：`gateway.pollConfirms()` 由巡视周期调用、sync 确认真通过 <!-- aiim-service f93bd9e；退避策略(间隔/上限)接入巡视时定 -->
 
 ## 5. aiim-service — packages/store
 
