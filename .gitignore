@@ -1,0 +1,6 @@
+# Control repo carries docs + openspec only (no build chain).
+.DS_Store
+node_modules/
+*.log
+.env
+.env.*
